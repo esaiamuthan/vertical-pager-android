@@ -1,13 +1,11 @@
 package com.shop.marqueapplication
 
-import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 
 class MainActivity : AppCompatActivity() {
@@ -49,8 +47,12 @@ class MainActivity : AppCompatActivity() {
         autoScrollHandler = Handler(Looper.getMainLooper())
         autoScrollRunnable = object : Runnable {
             override fun run() {
+                if(currentPosition == chunkedItems.size-1){
+                    autoScrollHandler.removeCallbacks(this)
+                }
+
                 currentPosition++
-                Log.e("currentPosition", "" + currentPosition)
+                Log.e("currentPosition", "" + (currentPosition % chunkedItems.size))
                 viewPager.setCurrentItem(currentPosition, true)
                 autoScrollHandler.postDelayed(this, 1000 * 5) // Adjust delay for auto-scroll speed
             }
@@ -69,9 +71,6 @@ class MainActivity : AppCompatActivity() {
 
 class VerticalPageTransformer(val marginPx: Int, val offsetPx: Int) : ViewPager2.PageTransformer {
     override fun transformPage(page: View, position: Float) {
-//        view.translationX = view.width * -(position * 0) // navigate through center
-//        view.translationY = position * view.height
-
         // Translate page vertically for smooth scrolling
         val offset = position * (page.height + marginPx)
         page.translationY = offset - offsetPx * position
@@ -83,19 +82,6 @@ class VerticalPageTransformer(val marginPx: Int, val offsetPx: Int) : ViewPager2
 
         // Adjust opacity to fade out non-focused pages
         page.alpha = 0.5f + (1 - Math.abs(position)) * 0.5f
-    }
-}
-
-class MarginItemDecoration(private val marginPx: Int, offsetPx: Int) :
-    RecyclerView.ItemDecoration() {
-    override fun getItemOffsets(
-        outRect: Rect,
-        view: View,
-        parent: RecyclerView,
-        state: RecyclerView.State,
-    ) {
-        outRect.top = marginPx / 2
-        outRect.bottom = marginPx / 2
     }
 }
 
